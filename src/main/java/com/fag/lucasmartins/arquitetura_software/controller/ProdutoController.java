@@ -1,21 +1,19 @@
 package com.fag.lucasmartins.arquitetura_software.controller;
 
-import com.fag.lucasmartins.arquitetura_software.dto.ProdutoRequestDTO;
-import com.fag.lucasmartins.arquitetura_software.dto.ProdutoResponseDTO;
-import com.fag.lucasmartins.arquitetura_software.service.ProdutoService;
+import com.fag.lucasmartins.arquitetura_software.controller.mapper.ProdutoDTOMapper;
+import com.fag.lucasmartins.arquitetura_software.model.bo.ProdutoBO;
+import com.fag.lucasmartins.arquitetura_software.model.service.ProdutoService;
+import com.fag.lucasmartins.arquitetura_software.view.dto.ProdutoDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Controller Refatorado
- * Responsabilidade Única (SRP): Apenas receber requisições HTTP e delegar para o Service
- * 
- * ANTES: Tinha regras de negócio, SQL e Map<String, Object>
- * AGORA: Apenas HTTP, DTOs tipados e delegação para o Service
+ * Controller Refatorado - 100% alinhado ao padrão MVC e SOLID
  */
 @RestController
 @RequestMapping("/produtos")
@@ -23,55 +21,40 @@ public class ProdutoController {
     
     private final ProdutoService produtoService;
     
-    // Injeção de dependência via construtor (DIP)
     public ProdutoController(ProdutoService produtoService) {
         this.produtoService = produtoService;
     }
     
-    /**
-     * Cadastra um novo produto
-     * ANTES: Recebia Map<String, Object>, validava manualmente, aplicava regras de negócio e SQL
-     * AGORA: Recebe DTO tipado, delega para o Service
-     */
     @PostMapping
-    public ResponseEntity<ProdutoResponseDTO> cadastrarProduto(
-            @Valid @RequestBody ProdutoRequestDTO request) {
-        ProdutoResponseDTO response = produtoService.criarProduto(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<ProdutoDTO> cadastrarProduto(@Valid @RequestBody ProdutoDTO request) {
+        ProdutoBO bo = ProdutoDTOMapper.toBo(request);
+        ProdutoBO salvo = produtoService.criarProduto(bo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ProdutoDTOMapper.toDto(salvo));
     }
     
-    /**
-     * Lista todos os produtos
-     */
     @GetMapping
-    public ResponseEntity<List<ProdutoResponseDTO>> listarProdutos() {
-        List<ProdutoResponseDTO> produtos = produtoService.listarProdutos();
+    public ResponseEntity<List<ProdutoDTO>> listarProdutos() {
+        List<ProdutoDTO> produtos = produtoService.listarProdutos()
+            .stream()
+            .map(ProdutoDTOMapper::toDto)
+            .collect(Collectors.toList());
         return ResponseEntity.ok(produtos);
     }
     
-    /**
-     * Busca um produto por ID
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<ProdutoResponseDTO> buscarProduto(@PathVariable Long id) {
-        ProdutoResponseDTO produto = produtoService.buscarProdutoPorId(id);
-        return ResponseEntity.ok(produto);
+    public ResponseEntity<ProdutoDTO> buscarProduto(@PathVariable Long id) {
+        ProdutoBO bo = produtoService.buscarProdutoPorId(id);
+        return ResponseEntity.ok(ProdutoDTOMapper.toDto(bo));
     }
     
-    /**
-     * Atualiza um produto existente
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<ProdutoResponseDTO> atualizarProduto(
-            @PathVariable Long id,
-            @Valid @RequestBody ProdutoRequestDTO request) {
-        ProdutoResponseDTO produto = produtoService.atualizarProduto(id, request);
-        return ResponseEntity.ok(produto);
+    public ResponseEntity<ProdutoDTO> atualizarProduto(@PathVariable Long id, @Valid @RequestBody ProdutoDTO request) {
+        ProdutoBO bo = ProdutoDTOMapper.toBo(request);
+        bo.setId(id);
+        ProdutoBO atualizado = produtoService.atualizarProduto(id, bo);
+        return ResponseEntity.ok(ProdutoDTOMapper.toDto(atualizado));
     }
     
-    /**
-     * Remove um produto
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarProduto(@PathVariable Long id) {
         produtoService.deletarProduto(id);

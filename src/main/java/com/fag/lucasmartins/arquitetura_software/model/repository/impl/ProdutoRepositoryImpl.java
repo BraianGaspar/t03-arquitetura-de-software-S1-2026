@@ -1,17 +1,13 @@
-package com.fag.lucasmartins.arquitetura_software.repository;
+package com.fag.lucasmartins.arquitetura_software.model.repository.impl;
 
-import com.fag.lucasmartins.arquitetura_software.model.Produto;
+import com.fag.lucasmartins.arquitetura_software.model.bo.ProdutoBO;
+import com.fag.lucasmartins.arquitetura_software.model.repository.ProdutoRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Implementação concreta do Repository
- * Responsabilidade Única (SRP): Apenas acesso a dados
- * Nenhuma regra de negócio aqui!
- */
 @Repository
 public class ProdutoRepositoryImpl implements ProdutoRepository {
     
@@ -21,7 +17,7 @@ public class ProdutoRepositoryImpl implements ProdutoRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
     
-    private final RowMapper<Produto> rowMapper = (rs, rowNum) -> new Produto(
+    private final RowMapper<ProdutoBO> rowMapper = (rs, rowNum) -> new ProdutoBO(
         rs.getLong("id"),
         rs.getString("nome"),
         rs.getBigDecimal("preco"),
@@ -30,48 +26,48 @@ public class ProdutoRepositoryImpl implements ProdutoRepository {
     );
     
     @Override
-    public Produto salvar(Produto produto) {
+    public ProdutoBO salvar(ProdutoBO bo) {
         String sql = "INSERT INTO produto (nome, preco, preco_final, estoque) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, 
-            produto.getNome(), 
-            produto.getPreco(), 
-            produto.getPrecoFinal(),
-            produto.getEstoque()
+            bo.getNome(), 
+            bo.getPreco(), 
+            bo.getPrecoFinal(),
+            bo.getEstoque()
         );
         
         Long id = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
-        produto.setId(id);
-        return produto;
+        bo.setId(id);
+        return bo;
     }
     
     @Override
-    public Optional<Produto> buscarPorId(Long id) {
+    public Optional<ProdutoBO> buscarPorId(Long id) {
         String sql = "SELECT * FROM produto WHERE id = ?";
         try {
-            Produto produto = jdbcTemplate.queryForObject(sql, rowMapper, id);
-            return Optional.ofNullable(produto);
+            ProdutoBO bo = jdbcTemplate.queryForObject(sql, rowMapper, id);
+            return Optional.ofNullable(bo);
         } catch (Exception e) {
             return Optional.empty();
         }
     }
     
     @Override
-    public List<Produto> buscarTodos() {
+    public List<ProdutoBO> buscarTodos() {
         String sql = "SELECT * FROM produto";
         return jdbcTemplate.query(sql, rowMapper);
     }
     
     @Override
-    public Produto atualizar(Produto produto) {
+    public ProdutoBO atualizar(ProdutoBO bo) {
         String sql = "UPDATE produto SET nome = ?, preco = ?, preco_final = ?, estoque = ? WHERE id = ?";
         jdbcTemplate.update(sql,
-            produto.getNome(),
-            produto.getPreco(),
-            produto.getPrecoFinal(),
-            produto.getEstoque(),
-            produto.getId()
+            bo.getNome(),
+            bo.getPreco(),
+            bo.getPrecoFinal(),
+            bo.getEstoque(),
+            bo.getId()
         );
-        return produto;
+        return bo;
     }
     
     @Override
