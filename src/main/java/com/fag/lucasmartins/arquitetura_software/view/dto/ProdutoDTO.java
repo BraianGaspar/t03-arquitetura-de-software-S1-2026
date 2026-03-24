@@ -1,6 +1,6 @@
 package com.fag.lucasmartins.arquitetura_software.view.dto;
 
-import jakarta.validation.constraints.*;
+import javax.validation.constraints.*;
 import java.math.BigDecimal;
 
 /**

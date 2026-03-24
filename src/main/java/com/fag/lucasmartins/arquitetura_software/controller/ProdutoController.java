@@ -4,7 +4,7 @@ import com.fag.lucasmartins.arquitetura_software.controller.mapper.ProdutoDTOMap
 import com.fag.lucasmartins.arquitetura_software.model.bo.ProdutoBO;
 import com.fag.lucasmartins.arquitetura_software.model.service.ProdutoService;
 import com.fag.lucasmartins.arquitetura_software.view.dto.ProdutoDTO;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Controller Refatorado - 100% alinhado ao padrão MVC e SOLID
- */
+
 @RestController
 @RequestMapping("/produtos")
 public class ProdutoController {
