@@ -1,4 +1,4 @@
-# Refatoração de Sistema Legado
+# Refatoração de Sistema Super Legado
 
 Bem-vindos, futuros Arquitetos de Software!
 
